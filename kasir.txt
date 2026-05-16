@@ -1,1 +1,5 @@
-1,mie,makanan,2000,2
+1,mie goreng,makanan instan,3000,20
+2,ayam,makanan,30000,30
+3,pensil,alat tulis,2000,20
+4,roko,kebutuhan ,2000,20
+5,sukro,makanan,2000,10

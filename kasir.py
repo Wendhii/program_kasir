@@ -1,7 +1,9 @@
 database = []
-pilih_menu = ["Tambah Barang", "Tampilkan Semua Barang"]
+pilih_menu = ["Tambah Barang", "Tampilkan Semua Barang", "Cari berdasarkan kategori"]
 
 
+             
+            
 
 def tambah_barang():
     id_barang = int(input("Masukan ID Barang: "))
@@ -9,18 +11,25 @@ def tambah_barang():
     kategori = input("Kategori: ")
     harga = int(input("Masukan Harga: "))
     stok = int(input("Stok: "))
-    
-    with open("kasir.txt", "r") as cek_data:
-        status_ketemu = False
-        tampilkan()
-        for i in database:
-            if nama_barang == i['nama_barang']:
-                status_ketemu = True
-                print("gagal, duplikat data")
-                break
-        if not status_ketemu:
-            with open("kasir.txt", "a") as data_menu:
-                data_menu.write(f"{id_barang},{nama_barang},{kategori},{harga},{stok}\n")    
+    # validasi admin
+    user_admin = input("Masukan Nama Admin: ")
+    status_admin = False
+    with open("admin.txt", "r") as admin:
+        for i in admin:
+            data_admin = i.split(",")
+            if user_admin.lower() in data_admin:
+                status_admin = True        
+                status_ketemu = False
+                for i in database:
+                    if id_barang == int(i['id_barang']):
+                        status_ketemu = True
+                        print("gagal, duplikat data")
+                        break
+                if not status_ketemu:
+                    with open("kasir.txt", "a") as data_menu:
+                        data_menu.write(f"{id_barang},{nama_barang},{kategori},{harga},{stok}\n")  
+        if not status_admin:
+            print("Hanya Admin yang bisa menambahkan barang.")  
 
 def tampilkan():
     with open("kasir.txt", "r") as ambil_data:
@@ -35,8 +44,26 @@ def tampilkan():
                     "stok": data[4]
                 }
             )
-    print("\nData berhasil ditampilkan.")
-                
+
+def kategori():
+    user_kategori = input("Masukan Kategori Barang: ")
+    ketemu = False
+    with open("kasir.txt", "r") as data:
+        for i in data:
+            cari_kategori = i.strip().split(",")
+            if user_kategori.lower() in cari_kategori[2].lower():
+                print(f"""
+Kategori {user_kategori.capitalize()} Ditemukan:
+ID Barang       : {cari_kategori[0]}
+Nama Barang     : {cari_kategori[1]}
+Kategori        : {cari_kategori[2]}
+Harga           : {cari_kategori[3]}
+Stok            : {cari_kategori[4]}""")
+                ketemu = True
+                # break
+        if not ketemu:
+            print(f"Maaf, kategori {user_kategori.capitalize()} tidak ditemukan!")
+               
          
 for i in range(len(pilih_menu)):
     print(f"{i+1}. {pilih_menu[i]}")
@@ -54,3 +81,5 @@ Nama Barang : {i['nama_barang']}
 Kategori    : {i['kategori']}
 Harga       : {i['harga']}
 Stok        : {i['stok']}""")
+    elif menu == "3":
+        kategori()
