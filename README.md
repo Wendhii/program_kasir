@@ -1,6 +1,6 @@
 Tugas Kelompok
 Membuat Program Kasir Sederhana
-Nama Anggota:
+*Nama Anggota*
 - Muhammad Wendy
 - Shabila
 - Tantri
