@@ -1,85 +1,135 @@
-database = []
-pilih_menu = ["Tambah Barang", "Tampilkan Semua Barang", "Cari berdasarkan kategori"]
-
-
-             
-            
+database_barang = [
+    {
+        "kode_barang": 1,
+        "nama_barang": "Ayam",
+        "kategori": "Makanan",
+        "harga": 15000,
+        "stok": 10
+    },
+    {
+        "kode_barang": 2,
+        "nama_barang": "Mizone",
+        "kategori": "Minuman",
+        "harga": 3000,
+        "stok": 12
+    },
+    {
+        "kode_barang": 3,
+        "nama_barang": "Pensil",
+        "kategori": "Alat Tulis",
+        "harga": 2000,
+        "stok": 20
+    }
+]
+keranjang = []
+opsi = ["Tambah Barang", "Tampilkan Semua Barang", "Cari Kategori", "beli Barang"]
 
 def tambah_barang():
-    id_barang = int(input("Masukan ID Barang: "))
+    kode_barang = int(input("Kode Barang: "))
     nama_barang = input("Nama Barang: ")
     kategori = input("Kategori: ")
-    harga = int(input("Masukan Harga: "))
-    stok = int(input("Stok: "))
-    # validasi admin
-    user_admin = input("Masukan Nama Admin: ")
-    status_admin = False
-    with open("admin.txt", "r") as admin:
-        for i in admin:
-            data_admin = i.split(",")
-            if user_admin.lower() in data_admin:
-                status_admin = True        
-                status_ketemu = False
-                for i in database:
-                    if id_barang == int(i['id_barang']):
-                        status_ketemu = True
-                        print("gagal, duplikat data")
-                        break
-                if not status_ketemu:
-                    with open("kasir.txt", "a") as data_menu:
-                        data_menu.write(f"{id_barang},{nama_barang},{kategori},{harga},{stok}\n")  
-        if not status_admin:
-            print("Hanya Admin yang bisa menambahkan barang.")  
+    harga = int(input("Harga Satuan: "))
+    stok = int(input("Stok Barang: "))
+    # validasi 
+    status = False
+    for i in database_barang:
+        if kode_barang == i['kode_barang']:
+            status = True
+            print("Kode barang sudah diapakai.")
+    if not status:
+        database_barang.append(
+            {
+                "kode_barang": kode_barang,
+                "nama_barang": nama_barang,
+                "kategori": kategori,
+                "harga": harga,
+                "stok": stok
+            }
+        )
+        print("Barang sudah ditambahkan ke database.")
 
 def tampilkan():
-    with open("kasir.txt", "r") as ambil_data:
-        for i in ambil_data:
-            data = i.strip().split(",")
-            database.append(
-                {
-                    "id_barang": data[0],
-                    "nama_barang": data[1],
-                    "kategori": data[2],
-                    "harga": data[3],
-                    "stok": data[4]
-                }
-            )
+    for i in database_barang:
+        print(f"""
+Kode Barang         : {i['kode_barang']}
+Nama Barang         : {i['nama_barang']}
+Kategori Barang     : {i['kategori']}
+Harga Satuan        : {i['harga']}
+Stok Baranag        : {i['stok']}""")
 
 def kategori():
-    user_kategori = input("Masukan Kategori Barang: ")
+    cari_kategori = input("Mau cari kategori barang apa?: ")
     ketemu = False
-    with open("kasir.txt", "r") as data:
-        for i in data:
-            cari_kategori = i.strip().split(",")
-            if user_kategori.lower() in cari_kategori[2].lower():
-                print(f"""
-Kategori {user_kategori.capitalize()} Ditemukan:
-ID Barang       : {cari_kategori[0]}
-Nama Barang     : {cari_kategori[1]}
-Kategori        : {cari_kategori[2]}
-Harga           : {cari_kategori[3]}
-Stok            : {cari_kategori[4]}""")
-                ketemu = True
-                # break
-        if not ketemu:
-            print(f"Maaf, kategori {user_kategori.capitalize()} tidak ditemukan!")
-               
-         
-for i in range(len(pilih_menu)):
-    print(f"{i+1}. {pilih_menu[i]}")
+    for i in database_barang:
+        if cari_kategori.lower() == i['kategori'].lower():
+            ketemu = True
+            print(f"""
+Daftar Kategori {cari_kategori.capitalize()}:
+Kode Barang         : {i['kode_barang']}
+Nama Barang         : {i['nama_barang']}
+Kategori Barang     : {i['kategori']}
+Harga Satuan        : {i['harga']}
+Stok Barang        : {i['stok']}""")
+    if not ketemu:
+        print(f"Kategori {cari_kategori.capitalize()} tidak tersedia.")
+        
+def beli():
+    nama_barang = input("Masukan Nama Barang: ")
+    jumlah = int(input("Jumlah: "))
+    status = False
+    for i in database_barang:
+        if nama_barang.lower() == i['nama_barang'].lower():
+            status = True
+            if jumlah <= i['stok']:
+                keranjang.append(
+                    {
+                        "nama_barang": nama_barang,
+                        'jumlah': jumlah
+                    }
+                )
+                i['stok'] -= jumlah
+                print("Barang berhasil ditambahkan ke keranjang.")
+            else:
+                print("stok tidak cukup.")
+    if not status:
+        print("barang tidak tersedia.")
+
+def tambah_keranjang():
+    global database_barang
+    nama_barang = input("Masukan Nama Barang: ")
+    jumlah = int(input("Mau beli berapa?: "))
+    ketemu = False
+    for i in keranjang:
+        if nama_barang.lower() == i['nama_barang'].lower():
+            ketemu = True
+            i['nama_barang'] = nama_barang
+            i['jumlah'] += jumlah
+            for k in database_barang:
+                if nama_barang.lower() == k['nama_barang'].lower():
+                    k['stok'] -= jumlah
+    if not ketemu:
+        print("not ketemu")
+            
+print("Selamat Datang Di Toko Kami")
+for i in range(len(opsi)):
+    print(f"{i+1}. {opsi[i]}")
     
 while True:
-    menu = input("Pilih Menu: ")
-    if menu == "1":
+    opsi = input("Pilih Opsi: ")
+    if opsi == "1":
         tambah_barang()
-    elif menu == "2":
+    elif opsi == "2":
         tampilkan()
-        for i in database:
-            print(f"""
-ID          : {i['id_barang']}
-Nama Barang : {i['nama_barang']}
-Kategori    : {i['kategori']}
-Harga       : {i['harga']}
-Stok        : {i['stok']}""")
-    elif menu == "3":
+    elif opsi == "3":
         kategori()
+    elif opsi == "4":
+        beli()
+        while True:
+            lagi = input("Mau beli apa lagi?")
+            if lagi == 'y':
+                tambah_keranjang()
+            else:
+                print(keranjang)
+                break
+            
+            
