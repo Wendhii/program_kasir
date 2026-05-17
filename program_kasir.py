@@ -73,43 +73,35 @@ Stok Barang        : {i['stok']}""")
     if not ketemu:
         print(f"Kategori {cari_kategori.capitalize()} tidak tersedia.")
         
-def beli():
-    nama_barang = input("Masukan Nama Barang: ")
-    jumlah = int(input("Jumlah: "))
-    status = False
+def tambah_keranjang():
+    nama_barang = input("Nama Barang: ")
+    ketemu = False
     for i in database_barang:
         if nama_barang.lower() == i['nama_barang'].lower():
-            status = True
-            if jumlah <= i['stok']:
-                keranjang.append(
-                    {
-                        "nama_barang": nama_barang,
-                        'jumlah': jumlah
-                    }
-                )
-                i['stok'] -= jumlah
-                print("Barang berhasil ditambahkan ke keranjang.")
-            else:
-                print("stok tidak cukup.")
-    if not status:
-        print("barang tidak tersedia.")
-
-def tambah_keranjang():
-    global database_barang
-    nama_barang = input("Masukan Nama Barang: ")
-    jumlah = int(input("Mau beli berapa?: "))
-    ketemu = False
-    for i in keranjang:
-        if nama_barang.lower() == i['nama_barang'].lower():
+            jumlah = int(input("Mau beli berapa?: "))
             ketemu = True
-            i['nama_barang'] = nama_barang
-            i['jumlah'] += jumlah
-            for k in database_barang:
-                if nama_barang.lower() == k['nama_barang'].lower():
-                    k['stok'] -= jumlah
+            if jumlah <= i['stok']:
+                cek_keranjang = False
+                for k in keranjang:
+                    if nama_barang.lower() == k['nama_barang'].lower():
+                        cek_keranjang = True
+                        k['nama_barang'] = nama_barang
+                        k['jumlah'] += jumlah
+                        i['stok'] -= jumlah
+                if not cek_keranjang:
+                    keranjang.append(
+                        {
+                            "nama_barang": nama_barang,
+                            "jumlah": jumlah
+                        }
+                    )
+                    i['stok'] -= jumlah
+            else:
+                print(f"Maaf, sisa stok {nama_barang} tidak mencukupi. sisa stok: {i['stok']}")
     if not ketemu:
-        print("not ketemu")
-            
+        print("Maaf, barang tidak tersedia.")         
+
+
 print("Selamat Datang Di Toko Kami")
 for i in range(len(opsi)):
     print(f"{i+1}. {opsi[i]}")
@@ -123,13 +115,11 @@ while True:
     elif opsi == "3":
         kategori()
     elif opsi == "4":
-        beli()
+        tambah_keranjang()
         while True:
-            lagi = input("Mau beli apa lagi?")
-            if lagi == 'y':
+            beli_lagi = input("Mau beli lagi?(y): ")
+            if beli_lagi == "y":
                 tambah_keranjang()
             else:
                 print(keranjang)
                 break
-            
-            
