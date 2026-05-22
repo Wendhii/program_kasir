@@ -21,9 +21,25 @@ database_barang = [
         "stok": 20
     }
 ]
+data_admin = [
+    {
+        "nama": "Muhammad Wendy",
+        "status": "Pegawai"
+    },
+    {
+        "nama": "Shabilla",
+        "status": "Pegawai"
+    },
+    {
+        "nama": "Tantri",
+        "status": "Pegawai"
+    }
+    
+]
+nama_kasir = "Belum Login"
 keranjang = []
 total = 0
-opsi = ["Tambah Barang", "Tampilkan Semua Barang", "Cari Kategori", "beli Barang", "Pembayaran"]
+opsi = ["Login","Tambah Barang", "Tampilkan Semua Barang", "Cari Kategori", "beli Barang", "Pembayaran", "Keluar Program"]
 
 # bagian Shabilla dari sini
 def tambah_barang():
@@ -52,6 +68,18 @@ def tambah_barang():
             }
         )
         print("Barang sudah ditambahkan ke database.")
+
+def admin(nama_admin):
+    global nama_kasir
+    status = False
+    for i in data_admin:
+        if nama_admin.lower() in i['nama'].lower():
+            nama_kasir = nama_admin
+            print(f"Nama Admin : {nama_kasir}. Anda memiliki akses ke Opsi 2.")
+            status = True
+    if not status:
+        print("Login Gagal. Anda tidak punya akses ke Opsi 2.")
+    return
 
 def tampilkan():
     for i in database_barang:
@@ -83,21 +111,20 @@ Stok Barang        : {i['stok']}""")
         print(f"Kategori {cari_kategori.capitalize()} tidak tersedia.")
 
 def diskon():
-    global total
+    total_akhir = total
     diskon = 0
     pajak = 0.11
     # kondisi apabila total belanja lebih dari 100.000
-    if total > 100000:
+    if total_akhir > 100000:
         diskon = 0.1
     # kondsi apabila total belanja lebih dari 50.000
-    elif total > 50000:
+    elif total_akhir > 50000:
         diskon = 0.05
-        
-    total *= diskon
-    # total_pajak = total * pajak
-    # k['harga'] -= total_diskon
-    # k['harga'] += total_pajak 
-    return total
+    total_diskon = total_akhir * diskon
+    total_akhir -= total_diskon
+    total_pajak = total_akhir * pajak
+    total_akhir = total_akhir + total_pajak
+    return total_akhir
 # Sampai Sini
        
 def tambah_keranjang():
@@ -138,35 +165,52 @@ def bayar():
     if keranjang == []:
         print("Keranjang masih kosong, belanja dulu.")
         return
-    # diskon()
+    total_bayar = diskon()
     uang_pelanggan = int(input("Masukan uang pelanggan: "))
-    if uang_pelanggan < total:
+    if uang_pelanggan < total_bayar:
         print("Maaf, Uang tidak cukup untuk melakukan transaksi.")
-    elif uang_pelanggan >= total and total != 0:
-        kembalian = uang_pelanggan - total
+    elif uang_pelanggan >= total_bayar:
+        kembalian = uang_pelanggan - total_bayar
         print(f"""
-Uang Pelanggan          : {uang_pelanggan}
-Total Belanja           : {total}
-Uang Kembalian          : {kembalian}
-Terima Kasih Sudah berbelanja, barang sudah dihapus dari keranjang
-""")
+Uang Pelanggan          : RP{uang_pelanggan}
+Total Belanja           : RP{total_bayar}
+Uang Kembalian          : RP{kembalian}
+Terima Kasih Sudah berbelanja, barang sudah dihapus dari keranjang""")
+        struk()
         total = 0
         keranjang.clear()
 
+def struk ():
+    print(f"""
+========================================
+               KING STORE
+========================================
+Kasir   : {nama_kasir}
+----------------------------------------""")
+    for i in keranjang:
+        nama_dan_jumlah = f"{i['nama_barang']} x{i['jumlah']} Pcs"
+        harga_satuan = f"{i['harga']}"
+        print(f"{nama_dan_jumlah:<30} : {harga_satuan:>5}")
+    print("----------------------------------------")
 
 print("Selamat Datang Di Toko Kami")            
 for i in range(len(opsi)):
     print(f"{i+1}. {opsi[i]}")
-
 while True:
     opsi = input("Pilih Opsi: ")
     if opsi == "1":
-        tambah_barang()
+        admin_login = input("Nama Kasir: ")
+        admin(admin_login)
     elif opsi == "2":
-        tampilkan()
+        if nama_kasir == "Belum Login":
+            print("Maaf, Hanya Kasir yang bisa menambahkan barang. Login Dulu")
+        else:
+            tambah_barang()
     elif opsi == "3":
-        kategori()
+        tampilkan()
     elif opsi == "4":
+        kategori()
+    elif opsi == "5":
         tambah_keranjang()
         while True:
             beli_lagi = input("Mau beli lagi?(y): ")
@@ -182,7 +226,10 @@ Harga Satuan        : Rp{int(keranjang[i]['harga'])}""")
                 print(f"\nTotal Bayar         : RP{total}")
                 bayar()
                 break
-    elif opsi == "5":
+    elif opsi == "6":
         bayar()
+    elif opsi == "7":
+        print("Keluar dari program")
+        break
     else:
         print("rawr")
